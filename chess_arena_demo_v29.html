@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CHESS ARENA</title>
+<style>
+:root{--bg:#101114;--panel:#1b1d22;--gold:#e8c777;--muted:#a8a8ad;--line:#514126}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#282116 0,#101114 48%);color:#f5f2ea;font-family:system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+.wrap{max-width:980px;margin:auto;padding:18px 15px 45px}.brand{text-align:center;padding:16px 0 20px}.mark{font-size:40px;color:var(--gold)}h1{letter-spacing:4px;margin:7px 0;color:var(--gold);font-size:clamp(26px,5vw,40px)}.sub,.note{color:var(--muted)}.panel{background:rgba(27,29,34,.97);border:1px solid var(--line);border-radius:19px;padding:19px;margin:14px 0;box-shadow:0 16px 45px #0005}h2{font-size:19px;margin:0 0 14px}.langs,.actions,.boards{display:grid;gap:11px}.langs{grid-template-columns:repeat(3,1fr)}.actions{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}.boards{grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}button{border:1px solid #80622d;background:#24211b;color:var(--gold);padding:13px 14px;border-radius:12px;font-weight:650;font-size:15px;cursor:pointer;transition:.15s}button:hover,button.active{background:#4a3920;border-color:var(--gold);transform:translateY(-1px)}.action{min-height:93px;text-align:left;display:flex;flex-direction:column;justify-content:center;gap:8px}.ico{font-size:24px}.hidden{display:none!important}.row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1}.field{width:100%;padding:14px;border-radius:10px;background:#101114;border:1px solid #514126;color:white;margin:6px 0 12px;font-size:16px}.note{font-size:13px;line-height:1.5}.status{color:var(--gold);min-height:22px;margin-top:10px;white-space:pre-wrap}.footer{text-align:center;color:#777;font-size:12px;margin-top:24px}.topline{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.back{margin-bottom:12px}.board{height:80px;border-radius:9px;display:grid;grid-template-columns:repeat(4,1fr);overflow:hidden;border:1px solid #777}.board i:nth-child(odd){background:var(--a)}.board i:nth-child(even){background:var(--b)}.board i{display:block}.boardname{margin-top:7px;font-size:13px}.boardpick{cursor:pointer;padding:8px;border:1px solid transparent;border-radius:12px}.boardpick.selected{border-color:var(--gold);background:#4a392033}.pill{display:inline-block;padding:5px 10px;border:1px solid #66512d;border-radius:20px;color:var(--gold);font-size:12px}.chessboard{width:min(92vw,480px);aspect-ratio:1;display:grid;grid-template-columns:repeat(8,1fr);border:4px solid #8b6b37;border-radius:8px;overflow:hidden;margin:14px auto}.sq{border:0;border-radius:0;padding:0;display:grid;place-items:center;font-size:clamp(22px,6vw,42px);color:#171717;aspect-ratio:1}.sq.light{background:var(--board-light,#eadfc9)}.sq.dark{background:var(--board-dark,#8b6948)}.sq.selected{outline:4px solid #e8c777;outline-offset:-4px;background:#c49b42}.sq.lastmove{box-shadow:inset 0 0 0 4px #22c55e;}.sq.legal{position:relative}.sq.legal:after{content:"";width:23%;height:23%;border-radius:50%;background:#2c9b65aa;position:absolute}.sq.capture:after{content:"";width:78%;height:78%;border:4px solid #d85b4b;border-radius:50%;background:transparent;position:absolute}.gamebar{display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap;align-items:center}.roomcode{font-size:22px;letter-spacing:3px;color:var(--gold);font-weight:800}.sq{position:relative}
+/* Clean 2D chess pieces — crisp silhouettes, no bulky 3D effects */
+.sq .piece3d{
+  display:inline-block; position:relative; z-index:1;
+  font-family:"Noto Sans Symbols","Noto Sans Symbols 2","FreeSerif",serif;
+  font-weight:300; font-size:1.00em; line-height:1; transform:none;
+  background:none; -webkit-background-clip:initial; background-clip:initial;
+  -webkit-text-fill-color:initial; filter:none; text-shadow:none;
+  transition:transform .12s ease; user-select:none;
+}
+.sq .piece3d.white-piece{
+  color:#fff; -webkit-text-stroke:.55px #111;
+  text-shadow:none;
+}
+.sq .piece3d.black-piece{
+  color:#050505; -webkit-text-stroke:0;
+  text-shadow:none;
+}
+.sq:active .piece3d{transform:scale(.94)}
+.chatlog{height:150px;overflow:auto;background:#101114;border-radius:10px;padding:10px;margin:10px 0;color:#ddd}
+.game-result{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:20px;background:#000b;backdrop-filter:blur(5px)}
+.game-result-card{width:min(92vw,440px);padding:30px 22px;text-align:center;background:linear-gradient(145deg,#282116,#17181d);border:2px solid var(--gold);border-radius:22px;box-shadow:0 20px 70px #000b}
+.game-result-icon{font-size:58px;margin-bottom:12px}
+.game-result-title{font-size:clamp(25px,7vw,38px);font-weight:900;letter-spacing:1px;color:var(--gold);margin:0 0 10px}
+.game-result-sub{color:#eee;font-size:15px;line-height:1.5;margin:0 0 22px}
+.game-result-card button{min-width:145px}
+.review-controls{display:flex;align-items:center;justify-content:center;gap:18px;margin:14px auto;padding:10px;border:1px solid var(--gold);border-radius:14px;max-width:360px}
+.review-controls button{width:54px;height:46px;font-size:30px;line-height:1;border-radius:10px}
+.review-controls button:disabled{opacity:.35;cursor:not-allowed}
+.review-controls span{font-size:13px;text-align:center;color:var(--text)}
+
+@media(max-width:520px){.langs{grid-template-columns:1fr}.wrap{padding:11px}.panel{padding:15px}}
+
+/* CHESS ARENA v20 — cinematic premium lobby + refined mobile layout */
+:root{--bg:#07090d;--panel:#10141c;--gold:#f3c75e;--muted:#aeb6c4;--line:#80602c;--text:#f7f5ef}
+body{background:radial-gradient(ellipse at 50% 5%,#282315 0%,#11151d 38%,#07090d 78%);background-attachment:fixed;color:var(--text)}
+.wrap{max-width:1120px;padding:clamp(12px,2.2vw,26px) 16px 42px}
+.brand{position:relative;padding:20px 10px 25px;isolation:isolate}
+.brand:before{content:"♛";position:absolute;z-index:-1;left:50%;top:-38px;transform:translateX(-50%);font-size:clamp(115px,22vw,210px);line-height:1;color:#d9a83b;opacity:.055;filter:blur(1px)}
+.mark{font-size:clamp(34px,5vw,54px);color:#ffda78;text-shadow:0 0 24px #e5ad3d88,0 4px 12px #000}
+h1{font-family:Georgia,serif;letter-spacing:clamp(3px,1vw,8px);font-size:clamp(30px,6vw,54px);font-weight:900;background:linear-gradient(180deg,#fff8df 8%,#d9dce2 48%,#b77e24 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 5px 5px #000);margin:5px 0 8px}
+.brand .sub{letter-spacing:3px;font-size:11px;color:#c6a65f}
+.panel{position:relative;background:linear-gradient(145deg,rgba(25,29,37,.97),rgba(10,13,19,.98));border:1px solid #735728;border-radius:22px;padding:clamp(16px,2.5vw,25px);margin:15px 0;box-shadow:0 18px 50px #0009,inset 0 1px #ffffff0b;overflow:hidden}
+.panel:after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;background:linear-gradient(120deg,#f5d27b0b,transparent 35%,transparent 70%,#f5d27b08)}
+.panel h2{font-size:clamp(18px,2.4vw,22px);letter-spacing:.2px}
+.pill{background:#17140e;border-color:#9d7838;color:#f5d27b;letter-spacing:1px}
+button{background:linear-gradient(145deg,#29251d,#15171d);border:1px solid #8c6a31;color:#f5d27b;box-shadow:0 5px 14px #0005,inset 0 1px #ffffff12;min-height:44px}
+button:hover,button.active{background:linear-gradient(145deg,#55401d,#282016);border-color:#f5d27b;box-shadow:0 0 18px #dba83e35,0 7px 18px #0007}
+.action{min-height:112px;border-radius:17px;padding:17px;background:linear-gradient(145deg,#20242c,#101319);border-color:#66512e}
+.action .ico{font-size:29px;filter:drop-shadow(0 3px 5px #000)}
+.field{background:#090c11;border-color:#45404a}
+.chessboard{width:min(94vw,560px);border:5px solid #a47a37;border-radius:13px;box-shadow:0 15px 38px #000b,0 0 0 1px #f7d68a55,inset 0 0 14px #0008;margin:18px auto}
+.sq.light{background:linear-gradient(145deg,#f5e9d3,#c8b18c)}
+.sq.dark{background:linear-gradient(145deg,#77583c,#382719)}
+.sq.selected{background:#c79a3e;outline:4px solid #ffe08a;box-shadow:inset 0 0 20px #fff5}
+.sq.lastmove{box-shadow:inset 0 0 0 4px #e4bd5b99}
+.sq .piece3d{font-size:1.00em;font-weight:300;filter:none;transform:none}
+.sq .piece3d.white-piece{color:#fff;-webkit-text-stroke:.55px #111;text-shadow:none;filter:none}
+.sq .piece3d.black-piece{color:#050505;-webkit-text-stroke:0;text-shadow:none;filter:none}
+.gamebar{padding:4px 0}
+.footer{color:#7f8793;letter-spacing:1px}
+.review-controls{background:#12151c}
+@media(max-width:600px){
+ .wrap{padding:9px 10px 30px}.brand{padding:13px 4px 17px}.brand:before{top:-16px}
+ .panel{border-radius:17px;margin:11px 0;padding:15px}
+ .langs{grid-template-columns:1fr}.actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .action{min-height:98px;padding:12px;font-size:14px}
+ .chessboard{width:min(96vw,520px);border-width:4px;border-radius:8px;margin:14px auto}
+ .sq{font-size:clamp(25px,8.1vw,42px)}
+ .sq .piece3d{font-size:.96em;font-weight:300;filter:none;transform:none}
+}
+@media(max-width:360px){.actions{grid-template-columns:1fr}.action{min-height:76px}}
+
+
+/* v24: game-first layout — maximize the playable board on phones */
+body:has(.chessboard) .wrap{max-width:none;width:100%;padding:4px 6px 16px}
+body:has(.chessboard) .brand{display:none}
+body:has(.chessboard) .panel{padding:8px;margin:4px 0;border-radius:12px;overflow:visible}
+body:has(.chessboard) .chessboard{width:min(100%, min(94vw, 82vh, 760px));max-width:760px;margin:8px auto;border-width:3px;border-radius:7px}
+body:has(.chessboard) .gamebar{padding:2px 4px}
+body:has(.chessboard) #turnLabel{margin:4px 4px;text-align:center;font-size:13px}
+body:has(.chessboard) .sq{font-size:clamp(24px, min(8.8vw, 5.4vh), 54px)}
+body:has(.chessboard) .row{padding:0 4px}
+body:has(.chessboard) .note{margin:7px 4px 2px}
+@media(min-width:700px){body:has(.chessboard) .wrap{padding:10px 14px 22px}}
+
+
+.promotion-options{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:18px 0}.promotion-option{min-width:0;padding:12px 5px;display:flex;flex-direction:column;align-items:center;gap:8px;font-size:12px}.promotion-glyph{font-family:"Noto Sans Symbols","Noto Sans Symbols 2",serif;font-size:clamp(30px,9vw,48px);line-height:1}.promotion-glyph.white-piece{color:#fff;-webkit-text-stroke:.7px #111}.promotion-glyph.black-piece{color:#050505;-webkit-text-stroke:0}
+
+/* v27: clear, compact promotion picker for narrow mobile screens */
+#promotionChoice{padding:14px;overflow-y:auto;box-sizing:border-box}
+#promotionChoice .game-result-card{box-sizing:border-box;width:min(92vw,420px);max-width:100%;padding:24px 16px}
+#promotionChoice .game-result-title{font-size:clamp(22px,6vw,30px);line-height:1.2;margin:0 0 18px;letter-spacing:0}
+#promotionChoice .promotion-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;width:100%;margin:0 0 18px}
+#promotionChoice .promotion-option{box-sizing:border-box;width:100%;min-width:0;min-height:112px;padding:12px 6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;border:1px solid #9d7937;border-radius:14px;background:linear-gradient(145deg,#30291e,#191a20);font-size:15px;font-weight:700;white-space:normal}
+#promotionChoice .promotion-glyph{display:block;font-size:48px;line-height:1.05}
+#promotionChoice .game-result-card>button:last-child{min-width:0;width:min(100%,220px);min-height:48px}
+@media(max-width:360px){#promotionChoice{padding:10px}#promotionChoice .game-result-card{padding:20px 12px}#promotionChoice .promotion-options{gap:8px}#promotionChoice .promotion-option{min-height:100px}}
+
+</style>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+</head>
+<body><main class="wrap">
+<header class="brand"><div class="mark">♛</div><h1>CHESS ARENA</h1><div class="sub">PLAY · COMPETE · CONQUER</div></header>
+
+<section class="panel" id="languagePanel">
+<h2 id="chooseTitle">Tilni tanlang / Выберите язык / Choose language</h2>
+<div class="langs"><button onclick="choose('uz')">🇺🇿 O‘zbekcha</button><button onclick="choose('ru')">🇷🇺 Русский</button><button onclick="choose('en')">🇬🇧 English</button></div>
+</section>
+
+<section class="panel hidden" id="registerPanel">
+<h2 id="regTitle">Ro‘yxatdan o‘tish</h2><p class="sub" id="regIntro"></p>
+<label id="nameLabel" for="regName"></label><input class="field" id="regName" autocomplete="name">
+<label id="contactLabel" for="regContact"></label><input class="field" id="regContact" autocomplete="username">
+<label id="passLabel" for="regPass"></label><input class="field" id="regPass" type="password" autocomplete="new-password">
+<div class="row"><button onclick="registerUser()" id="regButton"></button><button onclick="googleLogin()" id="googleButton"></button></div>
+<div class="status" id="regStatus"></div><p class="note" id="regNote"></p><button onclick="changeLang()" id="regChangeLang">🌐</button>
+</section>
+
+<section id="app" class="hidden">
+<section class="panel"><div class="topline"><div><h2 id="welcome"></h2><p class="sub" id="intro"></p></div><span class="pill">DARK EDITION</span></div><div class="actions" id="actions"></div></section>
+<div class="row"><button onclick="openSettings()" id="settingsButton">⚙ Sozlamalar</button><button onclick="changeLang()" id="changeLang"></button></div>
+</section>
+
+<section class="panel hidden" id="view"><button class="back" onclick="home()" id="backBtn">← Orqaga</button><div id="viewContent"></div></section>
+<div class="footer">CHESS ARENA · v28 · Chess Core Update</div></main>
+<script>/* CHESS ARENA v28 — offline chess core; legal moves, check, mate, castling, en-passant, promotion. */
+class Chess {
+ constructor(){this.reset()}
+ reset(){this.b=[...'rnbqkbnr'].map((t)=>({type:t,color:'b'}));this.b=[this.b,...Array.from({length:6},()=>Array(8).fill(null)),[...'RNBQKBNR'].map(t=>({type:t.toLowerCase(),color:'w'}))];this.b[1]=Array.from({length:8},()=>({type:'p',color:'b'}));this.b[6]=Array.from({length:8},()=>({type:'p',color:'w'}));this.side='w';this.castle={wk:true,wq:true,bk:true,bq:true};this.ep=null;this.half=0;this.full=1;this.hist=[];return this}
+ turn(){return this.side} get(s){let [r,c]=this.xy(s);let p=this.b[r]?.[c];return p?{...p}:null}
+ xy(s){return [8-Number(s[1]),s.charCodeAt(0)-97]} sq(r,c){return 'abcdefgh'[c]+(8-r)}
+ clone(){let x=Object.create(Chess.prototype);x.b=this.b.map(row=>row.map(p=>p&&({...p})));x.side=this.side;x.castle={...this.castle};x.ep=this.ep;x.half=this.half;x.full=this.full;x.hist=this.hist.slice();return x}
+ attacked(r,c,by){const b=this.b;let pawnDir=by==='w'?-1:1;for(let dc of [-1,1]){let rr=r-pawnDir,cc=c-dc;if(b[rr]?.[cc]?.color===by&&b[rr][cc].type==='p')return true}for(let [dr,dc] of [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]])if(b[r+dr]?.[c+dc]?.color===by&&b[r+dr][c+dc].type==='n')return true;for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++)if((dr||dc)&&b[r+dr]?.[c+dc]?.color===by&&b[r+dr][c+dc].type==='k')return true;for(let [dr,dc,types] of [[-1,0,'rq'],[1,0,'rq'],[0,-1,'rq'],[0,1,'rq'],[-1,-1,'bq'],[-1,1,'bq'],[1,-1,'bq'],[1,1,'bq']]){let rr=r+dr,cc=c+dc;while(b[rr]?.[cc]===null){rr+=dr;cc+=dc}let p=b[rr]?.[cc];if(p&&p.color===by&&types.includes(p.type))return true}return false}
+ king(color){for(let r=0;r<8;r++)for(let c=0;c<8;c++)if(this.b[r][c]?.type==='k'&&this.b[r][c].color===color)return [r,c];return null}
+ check(color=this.side){let k=this.king(color);return !!k&&this.attacked(k[0],k[1],color==='w'?'b':'w')}
+ pseudo(){let out=[],b=this.b,side=this.side;const add=(r,c,rr,cc,extra={})=>{if(rr<0||rr>7||cc<0||cc>7)return;let p=b[rr][cc];if(p?.color===side)return;out.push({from:this.sq(r,c),to:this.sq(rr,cc),...extra})};for(let r=0;r<8;r++)for(let c=0;c<8;c++){let p=b[r][c];if(!p||p.color!==side)continue;let t=p.type;if(t==='p'){let d=side==='w'?-1:1,start=side==='w'?6:1,last=side==='w'?0:7;if(!b[r+d]?.[c]){add(r,c,r+d,c,r+d===last?{promotion:'q'}:{});if(r===start&&!b[r+2*d][c])add(r,c,r+2*d,c)}for(let dc of [-1,1]){let rr=r+d,cc=c+dc;if(b[rr]?.[cc]&&b[rr][cc].color!==side)add(r,c,rr,cc,rr===last?{promotion:'q'}:{});if(this.ep===this.sq(rr,cc))add(r,c,rr,cc,{ep:true,promotion:rr===last?'q':undefined})}}else if(t==='n'){for(let [dr,dc] of [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]])add(r,c,r+dr,c+dc)}else if(t==='k'){for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++)if(dr||dc)add(r,c,r+dr,c+dc);let row=side==='w'?7:0,enemy=side==='w'?'b':'w';if(r===row&&c===4&&!this.check(side)){if(this.castle[side+'k']&&!b[row][5]&&!b[row][6]&&b[row][7]?.type==='r'&&b[row][7].color===side&&!this.attacked(row,5,enemy)&&!this.attacked(row,6,enemy))add(r,c,row,6,{castle:'k'});if(this.castle[side+'q']&&!b[row][1]&&!b[row][2]&&!b[row][3]&&b[row][0]?.type==='r'&&b[row][0].color===side&&!this.attacked(row,3,enemy)&&!this.attacked(row,2,enemy))add(r,c,row,2,{castle:'q'})}}else{let dirs=t==='b'?[[-1,-1],[-1,1],[1,-1],[1,1]]:t==='r'?[[-1,0],[1,0],[0,-1],[0,1]]:[[-1,-1],[-1,1],[1,-1],[1,1],[-1,0],[1,0],[0,-1],[0,1]];for(let [dr,dc] of dirs){let rr=r+dr,cc=c+dc;while(rr>=0&&rr<8&&cc>=0&&cc<8){if(b[rr][cc]?.color===side)break;add(r,c,rr,cc);if(b[rr][cc])break;rr+=dr;cc+=dc}}}}return out}
+ apply(m){let [r,c]=this.xy(m.from),[rr,cc]=this.xy(m.to),p=this.b[r][c],capt=this.b[rr][cc];this.hist.push({m:{...m},p:{...p},capt:capt&&{...capt},castle:{...this.castle},ep:this.ep,half:this.half,full:this.full});this.b[rr][cc]=m.promotion?{type:m.promotion,color:p.color}:p;this.b[r][c]=null;if(m.ep)this.b[rr+(p.color==='w'?1:-1)][cc]=null;if(m.castle){let row=p.color==='w'?7:0;if(m.castle==='k'){this.b[row][5]=this.b[row][7];this.b[row][7]=null}else{this.b[row][3]=this.b[row][0];this.b[row][0]=null}}if(p.type==='k'){this.castle[p.color+'k']=false;this.castle[p.color+'q']=false}if(p.type==='r'){if(r===7&&c===0)this.castle.wq=false;if(r===7&&c===7)this.castle.wk=false;if(r===0&&c===0)this.castle.bq=false;if(r===0&&c===7)this.castle.bk=false}if(capt?.type==='r'){if(rr===7&&cc===0)this.castle.wq=false;if(rr===7&&cc===7)this.castle.wk=false;if(rr===0&&cc===0)this.castle.bq=false;if(rr===0&&cc===7)this.castle.bk=false}this.ep=p.type==='p'&&Math.abs(rr-r)===2?this.sq((rr+r)/2,c):null;this.half=(p.type==='p'||capt)?0:this.half+1;if(this.side==='b')this.full++;this.side=this.side==='w'?'b':'w';return {from:m.from,to:m.to,promotion:m.promotion,san:m.from+'-'+m.to}}
+ moves(opts={}){let a=this.pseudo().filter(m=>{let x=this.clone();x.apply(m);return !x.check(this.side)});if(opts.square)a=a.filter(m=>m.from===opts.square);return opts.verbose?a:a.map(m=>m.from+m.to+(m.promotion||''))}
+ move(arg){let m;if(typeof arg==='string'){const normalized=arg.replace('-','');m=this.moves({verbose:true}).find(x=>x.from+x.to+(x.promotion||'')===normalized)}else m=this.moves({verbose:true}).find(x=>x.from===arg.from&&x.to===arg.to);if(!m)return null;if(m.promotion)m={...m,promotion:arg.promotion||'q'};return this.apply(m)}
+ undo(){
+   const h=this.hist.pop();if(!h)return null;
+   const m=h.m,[r,c]=this.xy(m.from),[rr,cc]=this.xy(m.to),moved=h.p;
+   this.b[r][c]={...moved};this.b[rr][cc]=h.capt?{...h.capt}:null;
+   if(m.ep)this.b[rr+(moved.color==='w'?1:-1)][cc]={type:'p',color:moved.color==='w'?'b':'w'};
+   if(m.castle){const row=moved.color==='w'?7:0;if(m.castle==='k'){this.b[row][7]=this.b[row][5];this.b[row][5]=null}else{this.b[row][0]=this.b[row][3];this.b[row][3]=null}}
+   this.castle={...h.castle};this.ep=h.ep;this.half=h.half;this.full=h.full;this.side=moved.color;return m;
+  }
+ game_over(){return this.is_checkmate()||this.in_draw()} is_checkmate(){return this.check()&&this.moves().length===0} in_check(){return this.check()} in_draw(){return this.moves().length===0&&!this.check()||this.half>=100||this.insufficient()}
+ insufficient(){let a=[];for(let r of this.b)for(let p of r)if(p&&p.type!=='k')a.push(p.type);return a.length===0||a.length===1&&['b','n'].includes(a[0])}
+}
+
+const T={
+uz:{choose:"Tilni tanlang",reg:"Ro‘yxatdan o‘tish",regIntro:"CHESS ARENA hisobini yaratish uchun ma’lumotlaringizni kiriting.",name:"Ismingiz",contact:"Telefon raqami yoki Gmail",pass:"Parol",register:"Ro‘yxatdan o‘tish",google:"Google orqali davom etish",regNote:"Demo: haqiqiy SMS tasdiqlash va Google orqali kirish server ulangandan keyin ishlaydi.",welcome:"Shaxmat maydoniga xush kelibsiz",intro:"O‘yna, bellash va o‘z reytingingni oshir.",computer:"Kompyuterga qarshi",friend:"Do‘st bilan o‘ynash",tournaments:"Turnirlar",ranking:"Global reyting",chat:"O‘yin chati",twoPlayer:"Ikki kishi o‘ynash",settings:"⚙ Sozlamalar",change:"🌐 Tilni o‘zgartirish",boards:"Shaxmat doskasi dizayni",boardNote:"12 ta dizayndan birini tanlang. Tanlov saqlanadi.",back:"← Bosh sahifa",start:"O‘yinni boshlash",selectMode:"O‘yin turini tanlang",coming:"Bu bo‘lim demo rejimida. Keyingi bosqichda serverga ulanadi.",join:"Turnirga yozilish",registered:"Demo: turnirga yozilish qayd etildi.",send:"Yuborish",message:"Xabar yozing...",reset:"Qayta boshlash",turn:"Navbat",white:"Oqlar",black:"Qoralar",move:"Yurish tanlandi",loginOk:"Demo profil ochildi: ",enter:"Barcha maydonlarni to‘ldiring.",googleMsg:"Google autentifikatsiyasi hali serverga ulanmagan.",save:"Saqlash",saved:"Sozlamalar saqlandi.",login:"Hisobga kirish",loginTab:"Ro‘yxatdan o‘tish",loginOk:"Demo hisob yaratildi: ",enter:"Ism, telefon/Gmail va parolni kiriting."},
+ru:{choose:"Выберите язык",reg:"Регистрация",regIntro:"Введите данные, чтобы создать аккаунт CHESS ARENA.",name:"Ваше имя",contact:"Телефон или Gmail",pass:"Пароль",register:"Зарегистрироваться",google:"Продолжить через Google",regNote:"Демо: SMS-подтверждение и вход Google заработают после подключения сервера.",welcome:"Добро пожаловать на шахматную арену",intro:"Играйте, соревнуйтесь и повышайте рейтинг.",computer:"Против компьютера",friend:"Играть с другом",tournaments:"Турниры",ranking:"Мировой рейтинг",chat:"Игровой чат",twoPlayer:"Игра вдвоём",settings:"⚙ Настройки",change:"🌐 Изменить язык",boards:"Дизайн шахматной доски",boardNote:"Выберите один из 12 вариантов. Выбор сохранится.",back:"← На главную",start:"Начать игру",selectMode:"Выберите режим игры",coming:"Этот раздел пока работает в демо-режиме.",join:"Записаться на турнир",registered:"Демо: заявка на турнир принята.",send:"Отправить",message:"Введите сообщение...",reset:"Начать заново",turn:"Ход",white:"Белые",black:"Чёрные",move:"Ход выбран",loginOk:"Демо-профиль создан: ",enter:"Заполните все поля.",googleMsg:"Google-аутентификация ещё не подключена.",save:"Сохранить",saved:"Настройки сохранены.",login:"Войти в аккаунт",loginTab:"Регистрация",loginOk:"Демо-аккаунт создан: ",enter:"Введите имя, телефон/Gmail и пароль."},
+en:{choose:"Choose your language",reg:"Create an account",regIntro:"Enter your details to create a CHESS ARENA account.",name:"Your name",contact:"Phone number or Gmail",pass:"Password",register:"Create account",google:"Continue with Google",regNote:"Demo: real SMS verification and Google sign-in require a connected server.",welcome:"Welcome to the chess arena",intro:"Play, compete and improve your rating.",computer:"Play against computer",friend:"Play with a friend",tournaments:"Tournaments",ranking:"Global leaderboard",chat:"In-game chat",twoPlayer:"Two-player game",settings:"⚙ Settings",change:"🌐 Change language",boards:"Chessboard design",boardNote:"Choose one of 12 designs. Your choice will be saved.",back:"← Home",start:"Start game",selectMode:"Choose a game mode",coming:"This section is in demo mode and will connect to the server later.",join:"Join tournament",registered:"Demo: tournament registration recorded.",send:"Send",message:"Write a message...",reset:"Restart",turn:"Turn",white:"White",black:"Black",move:"Move selected",loginOk:"Demo account created: ",enter:"Please complete all fields.",googleMsg:"Google authentication is not connected yet.",save:"Save",saved:"Settings saved.",login:"Sign in",loginTab:"Register",loginOk:"Demo account created: ",enter:"Enter your name, phone/Gmail and password."}
+};
+const themes=[["Classic Wood","#d7b98e","#805b3b"],["Tournament Green","#e9e4d5","#47764d"],["Marble","#e6e3df","#777"],["Gold","#f2d68b","#8d6725"],["Black Edition","#777","#202020"],["Neon","#5ddae8","#263c70"],["Royal","#e9d6a5","#4b315e"],["Glass","#d6e8ea","#547a82"],["Blue Ocean","#b8d8e8","#35678c"],["Carbon","#9b9b9b","#30343a"],["Minimal White","#f4f4f0","#bfc4c8"],["Dark Knight","#777","#17191d"]];
+const icons={computer:"🖥️",twoPlayer:"♟️",friend:"👥",tournaments:"🏆",ranking:"📊",chat:"💬"};
+let lang="uz",selectedTheme=0,voiceActive=false,boardState=[],selectedSquare=null,turn=0;
+let chess=null,gameMode="local",peer=null,conn=null,myColor="w",legalTargets=[];
+let reviewSnapshots=[],reviewIndex=0,reviewMode=false;
+function saveReviewSnapshot(){if(chess){reviewSnapshots.push(chess.clone());reviewIndex=reviewSnapshots.length-1}}
+function startGameReview(){
+ if(!reviewSnapshots.length&&chess)reviewSnapshots=[chess.clone()];
+ reviewMode=true;reviewIndex=Math.max(0,reviewSnapshots.length-1);
+ document.getElementById('gameResult')?.remove();renderGame();
+}
+function stepGameReview(delta){
+ if(!reviewMode||!reviewSnapshots.length)return;
+ reviewIndex=Math.max(0,Math.min(reviewSnapshots.length-1,reviewIndex+delta));
+ chess=reviewSnapshots[reviewIndex].clone();selectedSquare=null;legalTargets=[];renderGame();
+}
+const $=id=>document.getElementById(id),t=()=>T[lang];
+function choose(l){lang=l;$("languagePanel").classList.add("hidden");$("registerPanel").classList.remove("hidden");renderRegistration()}
+function renderRegistration(){let x=t();$("regChangeLang").textContent=x.change||"🌐";$("regTitle").textContent=x.reg;$("regIntro").textContent=x.regIntro;$("nameLabel").textContent=x.name;$("contactLabel").textContent=x.contact;$("passLabel").textContent=x.pass;$("regName").placeholder=x.name;$("regContact").placeholder=x.contact;$("regPass").placeholder=x.pass;$("regButton").textContent=x.register;$("googleButton").textContent=x.google;$("regNote").textContent=x.regNote}
+function registerUser(){let name=$("regName").value.trim(),contact=$("regContact").value.trim(),pass=$("regPass").value;if(!name||!contact||!pass){$("regStatus").textContent=t().enter;return}if(pass.length<4){$("regStatus").textContent=lang==="uz"?"Parol kamida 4 ta belgidan iborat bo‘lsin.":lang==="ru"?"Пароль должен содержать минимум 4 символа.":"Password must be at least 4 characters.";return}try{localStorage.setItem("chessArenaDemoUser",JSON.stringify({name,contact}))}catch(e){};$("regStatus").textContent=t().loginOk+name;$("registerPanel").classList.add("hidden");$("app").classList.remove("hidden");render()}
+function googleLogin(){$("regStatus").textContent=t().googleMsg}
+function changeLang(){$("app").classList.add("hidden");$("languagePanel").classList.remove("hidden")}
+function render(){const x=t();document.documentElement.lang=lang;$("welcome").textContent=x.welcome;$("intro").textContent=x.intro;$("settingsButton").textContent=x.settings;$("changeLang").textContent=x.change;let keys=["computer","twoPlayer","friend","tournaments","ranking","chat"];$("actions").innerHTML=keys.map(k=>`<button type="button" class="action" data-feature="${k}"><span class="ico">${icons[k]||"♟️"}</span><span>${x[k]||k}</span></button>`).join("")}
+document.addEventListener("click",function(ev){const btn=ev.target.closest("[data-feature]");if(!btn)return;ev.preventDefault();const key=btn.getAttribute("data-feature");try{openFeature(key)}catch(err){console.error("CHESS ARENA action error",err);show("CHESS ARENA",`<p class="sub">O‘yin bo‘limini ochishda xatolik yuz berdi.</p><p class="note">${String(err&&err.message||err)}</p><button onclick="home()">Bosh sahifa</button>`)}});
+function openSettings(){show(t().settings,`<h3>${t().boards}</h3><div class="boards" id="boards">${themes.map(([n,a,b],i)=>`<div class="boardpick ${i===selectedTheme?'selected':''}" onclick="selectTheme(${i})"><div class="board" style="--a:${a};--b:${b}">${Array.from({length:16},()=>'<i></i>').join('')}</div><div class="boardname">${i+1}. ${n}</div></div>`).join("")}</div><p class="note">${t().boardNote}</p><button onclick="saveSettings()">${t().save}</button><div class="status" id="settingsStatus"></div>`)}
+function selectTheme(i){selectedTheme=i;document.querySelectorAll(".boardpick").forEach((el,j)=>el.classList.toggle("selected",j===i))}
+function applyBoardTheme(){const theme=themes[selectedTheme]||themes[0];document.documentElement.style.setProperty("--board-light",theme[1]);document.documentElement.style.setProperty("--board-dark",theme[2])}
+function saveSettings(){try{localStorage.setItem("chessArenaTheme",String(selectedTheme))}catch(e){};applyBoardTheme();$("settingsStatus").textContent=t().saved}
+function home(){$("view").classList.add("hidden");$("app").classList.remove("hidden");}
+function show(title,body){$("app").classList.add("hidden");$("view").classList.remove("hidden");$("viewContent").innerHTML=`<h2>${title}</h2>${body}`}
+function openFeature(k){const x=t();if(k==="computer"){startGame("computer")}else if(k==="twoPlayer"){startGame("local")}else if(k==="friend"){show(x.selectMode,`<p class="sub">${lang==="uz"?"Do‘stingiz bilan internet orqali ulaning.":lang==="ru"?"Подключитесь к другу через интернет.":"Connect with a friend over the internet."}</p><div class="row"><button onclick="createRoom()">${lang==="uz"?"Xona yaratish":"Create room"}</button><button onclick="joinRoomPrompt()">${lang==="uz"?"Kod bilan kirish":"Join with code"}</button></div><p class="note">${lang==="uz"?"Onlayn o‘yin uchun ikkala telefonda ham internet va PeerJS xizmatiga ulanish kerak.":"Online play requires internet on both devices and access to the PeerJS connection service."}</p><div class="status" id="roomStatus"></div>`)}
+else if(k==="tournaments"){show(x.tournaments,`<p class="sub">${x.coming}</p><div class="panel"><h3>CHESS ARENA OPEN</h3><p>Rapid · 10+0 · Demo</p><button onclick="document.getElementById('featureStatus').textContent='${x.registered}'">${x.join}</button><div id="featureStatus" class="status"></div></div>`)}
+else if(k==="ranking"){show(x.ranking,`<p class="sub">${x.coming}</p><ol><li>GrandMaster — 2840</li><li>ChessKing — 2765</li><li>Player_007 — 2690</li><li>You — 1200</li></ol>`)}
+else if(k==="chat"){show(x.chat,`<div class="chatlog" id="chatlog"></div><input class="field" id="chatinput" placeholder="${x.message}"><button onclick="sendChat()">${x.send}</button>`)}
+}
+function sendChat(){const v=$("chatinput").value.trim();if(!v)return;$("chatlog").innerHTML+=`<p>🙂 ${escapeHtml(v)}</p>`;$("chatinput").value=""}
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function startGame(mode='local'){
+ applyBoardTheme();gameMode=mode;reviewMode=false;myColor=mode==='computer'?(Math.random()<0.5?'w':'b'):'w';selectedSquare=null;legalTargets=[];reviewMode=false;reviewIndex=0;reviewSnapshots=[];
+ const title=mode==='computer'?(lang==='uz'?'Kompyuterga qarshi':lang==='ru'?'Против компьютера':'Play against computer'):(lang==='uz'?'Ikki kishi o‘ynash':lang==='ru'?'Игра вдвоём':'Two-player game');
+ // Avval sahifani ochamiz: tashqi kutubxona bo‘lmasa ham foydalanuvchi bo‘sh ekranda qolmaydi.
+ try { chess=(typeof Chess==='function')?new Chess():null; } catch(err) { chess=null; }
+ if(chess){ try { reviewSnapshots=[chess.clone()];renderGame();if(mode==='computer'&&myColor==='b')setTimeout(computerMove,450);return; } catch(err) { console.error("Chess render error",err); chess=null; } }
+ const pieces=['♜','♞','♝','♛','♚','♝','♞','♜',...Array(8).fill('♟'),...Array(32).fill(''),...Array(8).fill('♙'),'♖','♘','♗','♕','♔','♗','♘','♖'];
+ let board='';
+ pieces.forEach((piece,i)=>{const row=Math.floor(i/8),col=i%8;board+=`<div class="sq ${(row+col)%2?'dark':'light'}">${piece}</div>`});
+ show(title,`<div class="panel"><h3>♟️ ${title}</h3><p class="sub">${lang==='uz'?'Shaxmat qoidalari qurilmaning o‘zida ishlaydi. Qonuniy yurishlar, shoh, mot, rokirovka va piyodani farzinga aylantirish qo‘llab-quvvatlanadi.':'Chess rules run offline on this device, including legal moves, check, checkmate, castling and promotion.'}</p><div class="chessboard">${board}</div><button onclick="home()">${t().back}</button></div>`);
+}
+function createRoom(){if(typeof Peer==='undefined'){setRoomStatus('PeerJS yuklanmadi. Internetni tekshiring.');return}const code=String(Math.floor(100000+Math.random()*900000));peer=new Peer('chessarena-'+code);myColor='w';setRoomStatus('Xona yaratilmoqda...');peer.on('open',()=>{show(t().selectMode,`<h3>${lang==='uz'?'Do‘stingizga shu kodni yuboring':'Share this code with your friend'}</h3><div class="roomcode">${code}</div><p class="sub">${lang==='uz'?'Do‘stingiz ulanayotganida kuting.':'Waiting for your friend to connect.'}</p><div class="status" id="roomStatus">${lang==='uz'?'Ulanish kutilmoqda...':'Waiting for connection...'}</div><button onclick="cancelPeer()">${t().back}</button>`)});peer.on('connection',c=>{if(conn){c.close();return}conn=c;myColor='w';wireConnection();conn.on('open',()=>{conn.send({type:'ready'});startGame('online')})});peer.on('error',e=>setRoomStatus('Ulanishda xatolik: '+e.type))}
+function joinRoomPrompt(){const code=prompt(lang==='uz'?'Do‘stingiz yuborgan 6 xonali kodni kiriting:':'Enter the 6-digit room code:');if(!code)return;if(!/^\d{6}$/.test(code)){alert(lang==='uz'?'Kod 6 ta raqamdan iborat bo‘lishi kerak.':'Code must contain 6 digits.');return}if(typeof Peer==='undefined'){setRoomStatus('PeerJS yuklanmadi. Internetni tekshiring.');return}peer=new Peer();myColor='b';setRoomStatus('Xonaga ulanmoqda...');peer.on('open',()=>{conn=peer.connect('chessarena-'+code,{reliable:true});wireConnection();conn.on('open',()=>{startGame('online')})});peer.on('error',e=>setRoomStatus('Ulanishda xatolik: '+e.type))}
+function wireConnection(){conn.on('data',msg=>{if(msg&&msg.type==='move'&&chess){const payload=msg.from&&msg.to?{from:msg.from,to:msg.to,promotion:msg.promotion||'q'}:(msg.san||'');const m=chess.move(payload);if(m){selectedSquare=null;legalTargets=[];playGameSound('move');saveReviewSnapshot();renderGame()}}else if(msg&&msg.type==='ready'){const el=$('gameStatus');if(el)el.textContent='Raqib ulandi! O‘yin boshlandi.'}});conn.on('close',()=>{if($('gameStatus'))$('gameStatus').textContent='Raqib aloqani uzdi.'})}
+function cancelPeer(){if(conn)conn.close();if(peer)peer.destroy();conn=null;peer=null;home()}
+function setRoomStatus(msg){const el=$('roomStatus');if(el)el.textContent=msg;else alert(msg)}
+
+let audioContext=null;
+function playGameSound(kind='move'){
+ try{
+  const AudioCtx=window.AudioContext||window.webkitAudioContext;
+  if(!AudioCtx)return;
+  audioContext=audioContext||new AudioCtx();
+  if(audioContext.state==='suspended')audioContext.resume();
+  const now=audioContext.currentTime;
+  // A short, naturalistic wooden chess-piece tap: layered impact + soft table resonance.
+  const duration=kind==='end'?.72:.16;
+  const buffer=audioContext.createBuffer(1,Math.ceil(audioContext.sampleRate*duration),audioContext.sampleRate);
+  const data=buffer.getChannelData(0);
+  for(let i=0;i<data.length;i++){
+   const t=i/audioContext.sampleRate;
+   const decay=Math.exp(-t*(kind==='end'?15:34));
+   const noise=(Math.random()*2-1)*decay;
+   const body=Math.sin(2*Math.PI*(kind==='end'?185:225)*t)*Math.exp(-t*(kind==='end'?13:29));
+   const click=Math.sin(2*Math.PI*(kind==='end'?1450:1750)*t)*Math.exp(-t*95);
+   data[i]=noise*.20+body*.48+click*.20;
+  }
+  const source=audioContext.createBufferSource(),filter=audioContext.createBiquadFilter(),gain=audioContext.createGain();
+  source.buffer=buffer;filter.type='lowpass';filter.frequency.value=kind==='end'?1900:2600;
+  gain.gain.setValueAtTime(kind==='end'?.52:.68,now);
+  gain.gain.exponentialRampToValueAtTime(.0001,now+duration);
+  source.connect(filter);filter.connect(gain);gain.connect(audioContext.destination);
+  source.start(now);
+  if(kind==='end'){
+   const second=audioContext.createBufferSource(),g2=audioContext.createGain();
+   second.buffer=buffer;g2.gain.setValueAtTime(.24,now+.17);g2.gain.exponentialRampToValueAtTime(.0001,now+.17+duration);
+   second.connect(filter);filter.connect(g2);g2.connect(audioContext.destination);second.start(now+.17);
+  }
+ }catch(e){console.warn('Game sound unavailable',e)}
+}
+function showGameResult(){
+ if(!chess||!chess.game_over()||document.getElementById('gameResult'))return;
+ let title='',sub='',symbol='♟';
+ if(chess.is_checkmate()){
+  const winner=chess.turn()==='w'?'b':'w';
+  symbol='♛';
+  if(gameMode==='computer'){
+   title=winner===myColor?(lang==='uz'?'SIZ G‘ALABA QOZONDINGIZ':lang==='ru'?'ВЫ ПОБЕДИЛИ':'YOU WIN'):(lang==='uz'?'SIZ YUTQAZDINGIZ':lang==='ru'?'ВЫ ПРОИГРАЛИ':'YOU LOST');
+  }else{
+   title=(winner==='w'?(lang==='uz'?'OQ DONALAR YUTDI':lang==='ru'?'БЕЛЫЕ ПОБЕДИЛИ':'WHITE WINS'):(lang==='uz'?'QORA DONALAR YUTDI':lang==='ru'?'ЧЁРНЫЕ ПОБЕДИЛИ':'BLACK WINS'));
+  }
+  sub=lang==='uz'?'Shoh mot! O‘yin yakunlandi.':lang==='ru'?'Мат! Игра окончена.':'Checkmate! The game is over.';
+ }else{
+  symbol='🤝';
+  title=lang==='uz'?'DURRANG':lang==='ru'?'НИЧЬЯ':'DRAW';
+  sub=lang==='uz'?'O‘yin durang bilan yakunlandi.':lang==='ru'?'Партия завершилась вничью.':'The game ended in a draw.';
+ }
+ playGameSound('end');
+ const overlay=document.createElement('div');
+ overlay.id='gameResult';overlay.className='game-result';
+ overlay.innerHTML=`<div class="game-result-card"><div class="game-result-icon">${symbol}</div><h2 class="game-result-title">${title}</h2><p class="game-result-sub">${sub}</p><button onclick="startGameReview()">${lang==='uz'?'O‘yin tahlili':lang==='ru'?'Анализ игры':'Game analysis'}</button> <button onclick="restartGame();document.getElementById('gameResult')?.remove()">${t().reset}</button> <button onclick="home();document.getElementById('gameResult')?.remove()">${t().back}</button></div>`;
+ document.body.appendChild(overlay);
+}
+
+function renderGame(){applyBoardTheme();let x=t();let files=myColor==='b'?[7,6,5,4,3,2,1,0]:[0,1,2,3,4,5,6,7];let ranks=myColor==='b'?[7,6,5,4,3,2,1,0]:[0,1,2,3,4,5,6,7];let squares='';for(const r of ranks){for(const f of files){const sq='abcdefgh'[f]+(8-r),piece=chess.get(sq),idx=r*8+f,isSel=selectedSquare===sq,legal=legalTargets.find(m=>m.to===sq),last=chess.hist.length?chess.hist[chess.hist.length-1].m:null,isLast=!!last&&(last.from===sq||last.to===sq),color=(r+f)%2?'dark':'light';squares+=`<button class="sq ${color} ${isLast?'lastmove':''} ${isSel?'selected':''} ${legal?(piece?'capture':'legal'):''}" onclick="tapSquare('${sq}')">${piece?pieceChar(piece):''}</button>`}}
+let status=chess.is_checkmate()?(lang==='uz'?'Shoh mot! O‘yin tugadi.': 'Checkmate! Game over.'):chess.in_draw()?(lang==='uz'?'Durrang.':'Draw.'):`${x.turn}: ${chess.turn()==='w'?x.white:x.black}${chess.in_check()?' · SHOH!':''}`;
+let online=gameMode==='online';let canMove=!online||chess.turn()===myColor;
+show(x.start,`<div class="gamebar"><span class="pill">${online?'ONLINE':gameMode==='computer'?'VS COMPUTER':'LOCAL 2 PLAYERS'}</span><span id="gameStatus" class="status">${online?(conn&&conn.open?'Raqib ulandi':'Ulanish...'):''}</span></div><p class="sub" id="turnLabel">${reviewMode?(lang==='uz'?'O‘yin tahlili · Yurish '+reviewIndex+' / '+(reviewSnapshots.length-1):lang==='ru'?'Анализ игры · Ход '+reviewIndex+' / '+(reviewSnapshots.length-1):'Game analysis · Move '+reviewIndex+' / '+(reviewSnapshots.length-1)):status}</p><div class="chessboard">${squares}</div>${reviewMode?`<div class="review-controls"><button type="button" onclick="stepGameReview(-1)" ${reviewIndex<=0?'disabled':''}>‹</button><span>${lang==='uz'?'Oldingi / Keyingi yurish':lang==='ru'?'Предыдущий / Следующий ход':'Previous / Next move'}</span><button type="button" onclick="stepGameReview(1)" ${reviewIndex>=reviewSnapshots.length-1?'disabled':''}>›</button></div>`:''}<div class="row"><button onclick="restartGame()">${x.reset}</button><button onclick="home()">${x.back}</button></div><p class="note">${lang==='uz'?(gameMode==='computer'?(myColor==='w'?'Siz pastdagi oq donalarda o‘ynaysiz. Bot yuqoridagi qora donalarda o‘ynaydi.':'Siz pastdagi qora donalarda o‘ynaysiz. Bot yuqoridagi oq donalarda o‘ynaydi.'):'Yurishlar shaxmat qoidalari bo‘yicha tekshiriladi. O‘yinchilar navbat bilan yuradi.'):'Moves follow chess rules. '+(gameMode==='computer'?(myColor==='w'?'You play the White pieces at the bottom; the bot plays Black at the top.':'You play the Black pieces at the bottom; the bot plays White at the top.'):'Two players take turns on this device.')}</p>`);if(chess.game_over()&&!reviewMode)showGameResult()}
+function pieceChar(p){
+ const glyphs={wk:'♔',wq:'♕',wr:'♖',wb:'♗',wn:'♘',wp:'♙',bk:'♚',bq:'♛',br:'♜',bb:'♝',bn:'♞',bp:'♟'};
+ const names={k:'shoh',q:'farzin',r:'rux',b:'fil',n:'ot',p:'piyoda'};
+ const color=p.color==='w'?'white-piece':'black-piece';
+ return `<span class="piece3d ${color}" role="img" aria-label="${p.color==='w'?'Oq':'Qora'} ${names[p.type]}">${glyphs[p.color+p.type]}</span>`;
+}
+function tapSquare(sq){if(!chess||chess.game_over()||reviewMode)return;if((gameMode==='online'||gameMode==='computer')&&chess.turn()!==myColor)return;const piece=chess.get(sq);if(selectedSquare){const candidate=legalTargets.find(m=>m.to===sq);if(candidate){if(candidate.promotion){showPromotionChoice(selectedSquare,sq,chess.turn());return}finishPlayerMove(selectedSquare,sq);return}if(piece&&piece.color===chess.turn()){selectedSquare=sq;legalTargets=chess.moves({square:sq,verbose:true})}else{selectedSquare=null;legalTargets=[]}}else if(piece&&piece.color===chess.turn()){selectedSquare=sq;legalTargets=chess.moves({square:sq,verbose:true})}renderGame()}
+function showPromotionChoice(from,to,color){
+ const glyphs={q:'♕',r:'♖',b:'♗',n:'♘'};
+ const labels={q:lang==='uz'?'Farzin':lang==='ru'?'Ферзь':'Queen',r:lang==='uz'?'Rux':lang==='ru'?'Ладья':'Rook',b:lang==='uz'?'Fil':lang==='ru'?'Слон':'Bishop',n:lang==='uz'?'Ot':lang==='ru'?'Конь':'Knight'};
+ const overlay=document.createElement('div');overlay.id='promotionChoice';overlay.className='game-result';
+ overlay.innerHTML=`<div class="game-result-card"><h2 class="game-result-title">${lang==='uz'?'Piyoda qaysi donaga aylansin?':lang==='ru'?'Выберите фигуру для пешки':'Choose a piece for promotion'}</h2><div class="promotion-options">${['q','r','b','n'].map(t=>`<button class="promotion-option" onclick="finishPlayerMove('${from}','${to}','${t}')"><span class="promotion-glyph ${color==='w'?'white-piece':'black-piece'}">${color==='w'?glyphs[t]:glyphs[t].replace('♕','♛').replace('♖','♜').replace('♗','♝').replace('♘','♞')}</span><span>${labels[t]}</span></button>`).join('')}</div><button onclick="cancelPromotionChoice()">${lang==='uz'?'Bekor qilish':lang==='ru'?'Отмена':'Cancel'}</button></div>`;
+ document.body.appendChild(overlay);
+}
+function cancelPromotionChoice(){document.getElementById('promotionChoice')?.remove();selectedSquare=null;legalTargets=[];renderGame()}
+function finishPlayerMove(from,to,promotion='q'){
+ if(reviewMode)return;
+ document.getElementById('promotionChoice')?.remove();const move=chess.move({from,to,promotion});if(!move)return;
+ playGameSound('move');saveReviewSnapshot();if(gameMode==='online'&&conn&&conn.open)conn.send({type:'move',from,to,promotion});
+ selectedSquare=null;legalTargets=[];renderGame();if(gameMode==='computer'&&chess&&!chess.game_over())setTimeout(computerMove,450);
+}
+function computerMove(){if(!chess||chess.game_over()||gameMode!=='computer'||chess.turn()===myColor)return;const moves=chess.moves({verbose:true});if(!moves.length)return;const move=moves[Math.floor(Math.random()*moves.length)];chess.move({from:move.from,to:move.to,promotion:'q'});saveReviewSnapshot();playGameSound('move');renderGame()}
+function restartGame(){if(gameMode==='online'){alert(lang==='uz'?'Onlayn o‘yinni qayta boshlash uchun yangi xona oching.':'Create a new room to restart online game.');return}startGame(gameMode==='computer'?'computer':'local')}
+try{selectedTheme=Number(localStorage.getItem("chessArenaTheme")||0)}catch(e){selectedTheme=0}
+if(!Number.isInteger(selectedTheme)||selectedTheme<0||selectedTheme>=themes.length)selectedTheme=0;applyBoardTheme();
+</script></body></html>
